@@ -1,0 +1,141 @@
+syntax = "v1"
+
+info (
+	title:  "Airdrop Task & Merkle Airdrop Service"
+	desc:   "基于任务积分的 ERC20 空投后台（go-zero + gorm）"
+	author: "auto-generated"
+)
+
+type (
+	BaseResp {
+		code int64  `json:"code"`
+		msg  string `json:"msg"`
+	}
+	UserInfo {
+		id         int64  `json:"id"`
+		walletAddr string `json:"wallet_addr"`
+		nickname   string `json:"nickname,optional"`
+	}
+	CreateUserReq {
+		walletAddr string `json:"wallet_addr"`
+		nickname   string `json:"nickname,optional"`
+	}
+	CreateUserResp {
+		BaseResp
+		data UserInfo `json:"data"`
+	}
+	GetUserData {
+		user  UserInfo `json:"user"`
+		score int64    `json:"score"`
+		tier  string   `json:"tier"`
+	}
+	GetUserResp {
+		BaseResp
+		data GetUserData `json:"data"`
+	}
+	UserTaskItem {
+		taskId      int64  `json:"task_id"`
+		code        string `json:"code"`
+		name        string `json:"name"`
+		status      int64  `json:"status"`
+		completedAt string `json:"completed_at,optional"`
+	}
+	UserTasksResp {
+		BaseResp
+		data []UserTaskItem `json:"data"`
+	}
+	// 任务上报通用请求
+	ReportTaskReq {
+		userId   int64  `json:"user_id"`
+		evidence string `json:"evidence,optional"` // 链接或截图说明
+		value    string `json:"value,optional"` // 如交易量、金额等
+	}
+	ScoreResp {
+		BaseResp
+		data ScoreData `json:"data"`
+	}
+	ScoreData {
+		score int64  `json:"score"`
+		tier  string `json:"tier"`
+	}
+	CreateSnapshotReq {
+		name         string `json:"name"`
+		tokenAddress string `json:"token_address"`
+	}
+	SnapshotInfo {
+		id           int64  `json:"id"`
+		name         string `json:"name"`
+		merkleRoot   string `json:"merkle_root"`
+		tokenAddress string `json:"token_address"`
+		totalUsers   int64  `json:"total_users"`
+		totalAmount  string `json:"total_amount"`
+		status       int64  `json:"status"`
+	}
+	CreateSnapshotResp {
+		BaseResp
+		data SnapshotInfo `json:"data"`
+	}
+	GetSnapshotResp {
+		BaseResp
+		data SnapshotInfo `json:"data"`
+	}
+	GetProofReq {
+		snapshotId int64  `form:"snapshot_id"`
+		address    string `form:"address"`
+	}
+	ProofData {
+		address string   `json:"address"`
+		index   int64    `json:"index"`
+		amount  string   `json:"amount"`
+		proof   []string `json:"proof"`
+	}
+	GetProofResp {
+		BaseResp
+		data ProofData `json:"data"`
+	}
+)
+
+@server (
+	prefix: /api/v1
+)
+service airdrop-api {
+	// 用户 & 任务
+	@handler CreateUser
+	post /users (CreateUserReq) returns (CreateUserResp)
+
+	@handler GetUser
+	get /users/:id returns (GetUserResp)
+
+	@handler GetUserTasks
+	get /users/:id/tasks returns (UserTasksResp)
+
+	@handler GetUserScore
+	get /users/:id/score returns (ScoreResp)
+
+	// 任务上报接口
+	@handler ReportPromote
+	post /tasks/promote (ReportTaskReq) returns (BaseResp)
+
+	@handler ReportQuantInvest
+	post /tasks/quant_invest (ReportTaskReq) returns (BaseResp)
+
+	@handler ReportTradeVolume
+	post /tasks/trade_volume (ReportTaskReq) returns (BaseResp)
+
+	@handler ReportReferral
+	post /tasks/referral (ReportTaskReq) returns (BaseResp)
+
+	@handler ReportLoginStreak
+	post /tasks/login_streak (ReportTaskReq) returns (BaseResp)
+
+	// 空投快照 & Merkle
+	@handler CreateSnapshot
+	post /airdrop/snapshot (CreateSnapshotReq) returns (CreateSnapshotResp)
+
+	@handler GetSnapshot
+	get /airdrop/snapshot/:id returns (GetSnapshotResp)
+
+	@handler GetSnapshotProof
+	get /airdrop/snapshot/:id/proof (GetProofReq) returns (GetProofResp)
+}
+
