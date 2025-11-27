@@ -1,92 +1,65 @@
-## 项目说明：任务制 ERC20 空投系统（go-zero + gorm + Foundry）
+# Airdrop Platform
 
-### 后端技术栈
-- **语言**：Go
-- **框架**：`go-zero`（REST API） + `gorm`（MySQL ORM）
-- **数据库**：MySQL，连接：`127.0.0.1:3306/airdrop`，账号/密码：`root/123456`
-- **目录**：
-  - `api/airdrop.api`：API 描述，用 `goctl api go` 生成服务骨架
-  - `service/airdrop`：后端服务
-    - `internal/model`：gorm 实体
-    - `internal/logic`：业务逻辑（任务、积分、快照、Merkle）
-    - `internal/merkle`：Merkle Tree 构建与 leaf 编码
-    - `internal/svc`：`ServiceContext`，内含 `*gorm.DB`
-    - `etc/airdrop-api.yaml`：配置（含 MySQL DSN）
-  - `sql/airdrop_schema.sql`：建库建表 SQL
-  - `sql/airdrop_seed.sql`：基础任务与示例数据
+一个基于 go-zero + GORM + MySQL 的任务空投服务，并配套 Foundry Solidity 合约（Merkle 防女巫）。
 
-### Solidity / Foundry
-- **目录**：
-  - `contracts/AirdropMerkle.sol`：Merkle 白名单空投合约（防女巫）
-  - `script/DeployAirdrop.s.sol`：部署脚本（使用环境变量 `AIRDROP_TOKEN`、`AIRDROP_MERKLE_ROOT`）
-  - `test/AirdropMerkle.t.sol`：Foundry 单元测试
-  - `foundry.toml`：Foundry 配置，包含 OpenZeppelin remapping
-- **合约特性**：
-  - 使用已有 ERC20 代币地址
-  - `merkleRoot` 控制一轮空投白名单
-  - `claim(index, account, amount, proof)`：使用 `keccak256(abi.encodePacked(index, account, amount))` + MerkleProof 验证
-  - `claimed[index]` 防重复领取
-  - 管理员可更新 `merkleRoot`、紧急提币
+## 目录结构
 
-### 启动步骤（后端）
+- `backend/service/airdrop/`：Go 服务，包含 API、逻辑、事件监听与单元测试。
+- `contracts/`：Foundry 工程，包含 `AirdropToken` 与 `AirdropDistributor` 合约、部署脚本与测试。
+- `backend/service/airdrop/model/airdrop.sql`：完整的数据库 DDL，可直接导入。
+
+## 后端快速开始
+
 1. **准备 MySQL**
-   - 确保本地 MySQL 运行在 `127.0.0.1:3306`，创建用户 `root/123456`
-2. **初始化数据库**
-   - 登录 MySQL：
-     - `mysql -uroot -p123456`
-   - 执行建表脚本（会自动创建 `airdrop` 库）：
-     - `SOURCE sql/airdrop_schema.sql;`
-   - 切库：
-     - `USE airdrop;`
-   - 执行基础数据脚本：
-     - `SOURCE sql/airdrop_seed.sql;`
-3. **生成 / 更新 go-zero 代码（如需）**
-   - `cd service/airdrop`
-   - `goctl api go -api ../../api/airdrop.api -dir .`
-4. **启动服务**
-   - 在 `service/airdrop` 目录：
-   - `go run airdrop.go -f etc/airdrop-api.yaml`
-   - 默认监听：`http://0.0.0.0:8888`
+   ```bash
+   mysql -uroot -p123456 < backend/service/airdrop/model/airdrop.sql
+   ```
+2. **配置**：复制 `etc/airdrop-api.yaml` 按需修改 `Mysql.DSN`、`Auth.AccessSecret`、`Admin.Wallets` 等。
+3. **运行服务**：
+   ```bash
+   cd backend/service/airdrop
+   go run airdrop.go -f etc/airdrop-api.yaml
+   ```
+4. **运行单元测试**：
+   ```bash
+   go test ./...
+   ```
 
-### 主要接口（HTTP 简要）
-- `POST /api/v1/users`：创建/注册用户（绑定钱包地址）
-- `GET /api/v1/users/{id}`：查询用户信息 + 当前积分 & 档位
-- `GET /api/v1/users/{id}/tasks`：查询用户任务完成情况
-- `GET /api/v1/users/{id}/score`：查询积分 & 档位
-- 任务上报：
-  - `POST /api/v1/tasks/promote`
-  - `POST /api/v1/tasks/quant_invest`
-  - `POST /api/v1/tasks/trade_volume`
-  - `POST /api/v1/tasks/referral`
-  - `POST /api/v1/tasks/login_streak`
-- 空投快照 & Merkle：
-  - `POST /api/v1/airdrop/snapshot`：生成快照（管理员）
-  - `GET /api/v1/airdrop/snapshot/{id}`：查询快照
-  - `GET /api/v1/airdrop/snapshot/{id}/proof?address=...`：查询某地址的 Merkle proof
+### 登录与 JWT
 
-### Go 单元测试（后端）
-- 测试文件在 `service/airdrop/internal/logic/*.go` 中：
-  - `logic_test.go`：公共 TestMain，使用真实 MySQL 连接 `airdrop` 库
-  - `user_logic_test.go`：用户创建 & 查询
-  - `task_logic_test.go`：任务上报 & 积分更新
-  - `snapshot_logic_test.go`：快照生成 & Merkle proof 查询
-- **运行前要求**：
-  - 按“初始化数据库”步骤，确保 `airdrop` 库已经按脚本建好并写入 `airdrop_seed.sql` 数据
-- 运行测试：
-  - `cd service/airdrop`
-  - `go test ./internal/logic -run .`
+- 客户端需构造消息 `airdrop-login:<wallet>:<timestamp>` 并使用钱包私钥 (personal_sign) 进行签名。
+- 登录成功后返回 `accessToken`，后续接口在 `Authorization: Bearer <token>` 中携带。
+- 系统记录连续登录天数并按 100~500 积分阶梯奖励。
 
-### Foundry 测试与部署
-1. **安装依赖**
-   - `forge install OpenZeppelin/openzeppelin-contracts --no-commit`
-2. **运行合约测试**
-   - `forge test`
-3. **部署示例**
-   - 设置环境变量（示例）：
-     - `export AIRDROP_TOKEN=0xYourErc20Address`
-     - `export AIRDROP_MERKLE_ROOT=0xYourMerkleRoot`
-   - 运行：
-     - `forge script script/DeployAirdrop.s.sol:DeployAirdrop --rpc-url <RPC_URL> --private-key <PK> --broadcast`
+### 任务与空投流程
 
+- 管理员使用 `/api/v1/admin/tasks/award` 按任务代码（`PROMO`、`INVEST`、`REFERRAL`）发放积分。
+- `/api/v1/admin/airdrop/start` 会冻结所有用户当前积分并写入 `round_points`，用于当轮空投。
+- 用户使用 `/api/v1/airdrop/claim` 记录链上领取意图。链上 `Claimed` 事件由 `claim_watcher` 实时监听，成功后扣减冻结积分并更新 `claims` 状态。
 
+## 智能合约 (Foundry)
 
+1. 安装依赖后运行测试：
+   ```bash
+   cd contracts
+   forge test
+   ```
+2. 部署脚本示例：`script/Deploy.s.sol` 读取 `PRIVATE_KEY`，部署 `AirdropToken` 与 `AirdropDistributor` 并为分发器预铸代币。
+3. `AirdropDistributor` 通过存储每轮的 Merkle Root 与截止时间，`claim(roundId, amount, proof)` 会校验证明、防止重复领取并发出 `Claimed` 事件。
+
+## 事件监听
+
+`etc/airdrop-api.yaml` 中 `Eth` 段落开启后，服务启动会连接指定 RPC，订阅 `Claimed` 日志，自动同步 `claims` 表与 `round_points.claimed_points`。
+
+## 常用命令
+
+```bash
+# 运行 go-zero 服务
+cd backend/service/airdrop && go run airdrop.go -f etc/airdrop-api.yaml
+
+# 运行 Go 单元测试
+go test ./...
+
+# 运行 Foundry 测试
+cd contracts && forge test
+```

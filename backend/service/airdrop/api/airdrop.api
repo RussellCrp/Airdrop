@@ -1,0 +1,87 @@
+syntax = "v1"
+
+type BaseResp {
+	code int64  `json:"code"`
+	msg  string `json:"msg"`
+}
+
+type LoginRequest {
+	wallet    string `json:"wallet"`
+	signature string `json:"signature"`
+	timestamp int64  `json:"timestamp"`
+}
+
+type LoginResponse {
+	accessToken string `json:"accessToken"`
+	expiresAt   int64  `json:"expiresAt"`
+	loginDays   int64  `json:"loginDays"`
+	points      int64  `json:"points"`
+}
+
+type AwardTaskRequest {
+	wallet string `json:"wallet"`
+	task   string `json:"task"`
+	amount int64  `json:"amount"`
+	extra  string `json:"extra"`
+}
+
+type AwardTaskResponse {
+	points int64 `json:"points"`
+}
+
+type StartRoundRequest {
+	roundName     string `json:"roundName"`
+	merkleRoot    string `json:"merkleRoot"`
+	tokenAddress  string `json:"tokenAddress"`
+	claimDeadline int64  `json:"claimDeadline"`
+}
+
+type RoundInfoResponse {
+	currentRoundId int64  `json:"currentRoundId"`
+	roundName      string `json:"roundName"`
+	claimDeadline  int64  `json:"claimDeadline"`
+	merkleRoot     string `json:"merkleRoot"`
+	tokenAddress   string `json:"tokenAddress"`
+	totalPoints    int64  `json:"totalPoints"`
+}
+
+type ClaimRequest {
+	roundId int64    `json:"roundId"`
+	wallet  string   `json:"wallet"`
+	amount  int64    `json:"amount"`
+	proof   []string `json:"proof"`
+}
+
+type ClaimResponse {
+	txHash string `json:"txHash"`
+	status string `json:"status"`
+}
+
+type PointsResponse {
+	wallet      string `json:"wallet"`
+	available   int64  `json:"available"`
+	frozen      int64  `json:"frozen"`
+	latestRound int64  `json:"latestRound"`
+	loginStreak int64  `json:"loginStreak"`
+}
+
+service airdrop-api {
+	@handler Login
+	post /api/v1/auth/login (LoginRequest) returns (LoginResponse)
+
+	@handler GetPoints
+	get /api/v1/me/points returns (PointsResponse)
+
+	@handler ClaimAirdrop
+	post /api/v1/airdrop/claim (ClaimRequest) returns (ClaimResponse)
+
+	@handler AwardTask
+	post /api/v1/admin/tasks/award (AwardTaskRequest) returns (AwardTaskResponse)
+
+	@handler StartRound
+	post /api/v1/admin/airdrop/start (StartRoundRequest) returns (RoundInfoResponse)
+
+	@handler RoundInfo
+	get /api/v1/admin/airdrop/round returns (RoundInfoResponse)
+}
+
