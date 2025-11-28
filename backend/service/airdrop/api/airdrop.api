@@ -90,6 +90,30 @@ type PointsResponse {
 	data PointsData `json:"data"`
 }
 
+type SubmitTaskRequest {
+	wallet      string `json:"wallet"`
+	taskCode    string `json:"taskCode"`
+	proveParams string `json:"proveParams"`
+}
+
+type SubmitTaskData {
+	points      int64 `json:"points"`
+	totalPoints int64 `json:"totalPoints"`
+}
+
+type SubmitTaskResponse {
+	BaseResp
+	data SubmitTaskData `json:"data"`
+}
+
+type RegistrationRequest {
+	wallet string `json:"wallet"`
+}
+
+type RegistrationResponse {
+	BaseResp
+}
+
 service airdrop-api {
 	@handler Login
 	post /api/v1/auth/login (LoginRequest) returns (LoginResponse)
@@ -108,5 +132,11 @@ service airdrop-api {
 
 	@handler RoundInfo
 	get /api/v1/admin/airdrop/round returns (RoundInfoResponse)
+
+	@handler SubmitTask
+	post /api/v1/airdrop/task/submit (SubmitTaskRequest) returns (SubmitTaskResponse)
+
+	@handler Registration
+	post /api/v1/airdrop/me/registration (RegistrationRequest) returns (RegistrationResponse)
 }
 

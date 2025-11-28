@@ -6,6 +6,7 @@ package logic
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"airdrop/internal/entity"
@@ -14,9 +15,10 @@ import (
 	"airdrop/internal/types"
 	"airdrop/internal/util"
 
+	"airdrop/internal/tasks/handler"
+
 	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 )
 
 const loginMessagePrefix = "airdrop-login"
@@ -47,55 +49,25 @@ func (l *LoginLogic) Login(req *types.LoginRequest) (*types.LoginResponse, error
 	if !l.validateTimestamp(req.Timestamp) {
 		return nil, errors.New("timestamp skew too large")
 	}
-	// message := fmt.Sprintf("%s:%s:%d", loginMessagePrefix, wallet, req.Timestamp)
-	// if err := util.VerifyPersonalSignature(wallet, req.Signature, message); err != nil {
-	// 	return nil, err
-	// }
-
-	now := time.Now().UTC()
-	var user entity.User
-	if err := l.svcCtx.RunTx(l.ctx, func(tx *gorm.DB) error {
-		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).Where("wallet = ?", wallet).First(&user).Error; err != nil {
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				user = entity.User{
-					Wallet:      wallet,
-					LoginStreak: 0,
-					LoginDays:   0,
-				}
-				if err := tx.Create(&user).Error; err != nil {
-					return err
-				}
-			} else {
-				return err
-			}
-		}
-		newDay := user.LastLoginAt == nil || !util.SameDay(*user.LastLoginAt, now)
-		if newDay {
-			if user.LastLoginAt != nil && util.IsYesterday(*user.LastLoginAt, now) {
-				if user.LoginStreak < 5 {
-					user.LoginStreak++
-				}
-			} else {
-				user.LoginStreak = 1
-			}
-			if user.LoginStreak > 5 {
-				user.LoginStreak = 5
-			}
-			user.LoginDays++
-			user.LastLoginAt = &now
-			reward := int64(user.LoginStreak) * 100
-			if reward > 0 {
-				if err := l.svcCtx.AwardPointsInTx(l.ctx, &user, reward, "login-streak", map[string]interface{}{
-					"streak": user.LoginStreak,
-				}, tx); err != nil {
-					return err
-				}
-			}
-			return tx.Save(&user).Error
-		}
-		return nil
-	}); err != nil {
+	message := fmt.Sprintf("%s:%s:%d", loginMessagePrefix, wallet, req.Timestamp)
+	if err := util.VerifyPersonalSignature(wallet, req.Signature, message); err != nil {
 		return nil, err
+	}
+
+	var user entity.User
+	if err := l.svcCtx.DB.Where("wallet = ?", wallet).First(&user).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			user = entity.User{
+				Wallet:      wallet,
+				LoginStreak: 0,
+				LoginDays:   0,
+			}
+			if err = l.svcCtx.DB.Create(&user).Error; err != nil {
+				return nil, err
+			}
+		} else {
+			return nil, err
+		}
 	}
 
 	role := security.RoleUser
@@ -104,6 +76,23 @@ func (l *LoginLogic) Login(req *types.LoginRequest) (*types.LoginResponse, error
 	}
 	token, expiresAt, err := l.svcCtx.JWTManager.Generate(user.ID, wallet, role)
 	if err != nil {
+		return nil, err
+	}
+
+	if taskHandler, err := handler.NewTaskHandler(&handler.TaskHandlerParams{
+		TaskCode: handler.LoginTaskCode,
+		SvcCtx:   l.svcCtx,
+		Wallet:   wallet,
+		Ctx:      l.ctx,
+	}); err == nil {
+		if err := taskHandler.Handle(); err != nil {
+			l.Logger.Errorf("handle task failed: %v", err)
+		}
+	} else {
+		l.Logger.Errorf("new task handler failed: %v", err)
+	}
+
+	if err := l.svcCtx.DB.Where("wallet = ?", wallet).First(&user).Error; err != nil {
 		return nil, err
 	}
 

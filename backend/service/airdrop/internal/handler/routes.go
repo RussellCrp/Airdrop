@@ -12,53 +12,48 @@ import (
 )
 
 func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
-	// public routes
 	server.AddRoutes(
 		[]rest.Route{
+			{
+				Method:  http.MethodGet,
+				Path:    "/api/v1/admin/airdrop/round",
+				Handler: RoundInfoHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/v1/admin/airdrop/start",
+				Handler: StartRoundHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/v1/admin/tasks/award",
+				Handler: AwardTaskHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/v1/airdrop/claim",
+				Handler: ClaimAirdropHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/v1/airdrop/me/registration",
+				Handler: RegistrationHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/v1/airdrop/task/submit",
+				Handler: SubmitTaskHandler(serverCtx),
+			},
 			{
 				Method:  http.MethodPost,
 				Path:    "/api/v1/auth/login",
 				Handler: LoginHandler(serverCtx),
 			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/api/v1/me/points",
+				Handler: GetPointsHandler(serverCtx),
+			},
 		},
 	)
-
-	// authenticated user routes
-	server.AddRoutes(rest.WithMiddlewares(
-		[]rest.Middleware{serverCtx.JWTMiddleware},
-		rest.Route{
-			Method:  http.MethodGet,
-			Path:    "/api/v1/me/points",
-			Handler: GetPointsHandler(serverCtx),
-		},
-		rest.Route{
-			Method:  http.MethodPost,
-			Path:    "/api/v1/airdrop/claim",
-			Handler: ClaimAirdropHandler(serverCtx),
-		},
-	))
-
-	// admin routes
-	adminMiddlewares := []rest.Middleware{
-		serverCtx.JWTMiddleware,
-		serverCtx.AdminMiddleware,
-	}
-	server.AddRoutes(rest.WithMiddlewares(
-		adminMiddlewares,
-		rest.Route{
-			Method:  http.MethodGet,
-			Path:    "/api/v1/admin/airdrop/round",
-			Handler: RoundInfoHandler(serverCtx),
-		},
-		rest.Route{
-			Method:  http.MethodPost,
-			Path:    "/api/v1/admin/airdrop/start",
-			Handler: StartRoundHandler(serverCtx),
-		},
-		rest.Route{
-			Method:  http.MethodPost,
-			Path:    "/api/v1/admin/tasks/award",
-			Handler: AwardTaskHandler(serverCtx),
-		},
-	))
 }

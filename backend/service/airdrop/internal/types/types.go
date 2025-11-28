@@ -3,15 +3,15 @@
 
 package types
 
+type AwardTaskData struct {
+	Points int64 `json:"points"`
+}
+
 type AwardTaskRequest struct {
 	Wallet string `json:"wallet"`
 	Task   string `json:"task"`
 	Amount int64  `json:"amount"`
 	Extra  string `json:"extra"`
-}
-
-type AwardTaskData struct {
-	Points int64 `json:"points"`
 }
 
 type AwardTaskResponse struct {
@@ -24,6 +24,11 @@ type BaseResp struct {
 	Msg  string `json:"msg"`
 }
 
+type ClaimData struct {
+	TxHash string `json:"txHash"`
+	Status string `json:"status"`
+}
+
 type ClaimRequest struct {
 	RoundId int64    `json:"roundId"`
 	Wallet  string   `json:"wallet"`
@@ -31,20 +36,9 @@ type ClaimRequest struct {
 	Proof   []string `json:"proof"`
 }
 
-type ClaimData struct {
-	TxHash string `json:"txHash"`
-	Status string `json:"status"`
-}
-
 type ClaimResponse struct {
 	BaseResp
 	Data ClaimData `json:"data"`
-}
-
-type LoginRequest struct {
-	Wallet    string `json:"wallet"`
-	Signature string `json:"signature"`
-	Timestamp int64  `json:"timestamp"`
 }
 
 type LoginData struct {
@@ -52,6 +46,12 @@ type LoginData struct {
 	ExpiresAt   int64  `json:"expiresAt"`
 	LoginDays   int64  `json:"loginDays"`
 	Points      int64  `json:"points"`
+}
+
+type LoginRequest struct {
+	Wallet    string `json:"wallet"`
+	Signature string `json:"signature"`
+	Timestamp int64  `json:"timestamp"`
 }
 
 type LoginResponse struct {
@@ -70,6 +70,14 @@ type PointsData struct {
 type PointsResponse struct {
 	BaseResp
 	Data PointsData `json:"data"`
+}
+
+type RegistrationRequest struct {
+	Wallet string `json:"wallet"`
+}
+
+type RegistrationResponse struct {
+	BaseResp
 }
 
 type RoundInfoData struct {
@@ -91,4 +99,20 @@ type StartRoundRequest struct {
 	MerkleRoot    string `json:"merkleRoot"`
 	TokenAddress  string `json:"tokenAddress"`
 	ClaimDeadline int64  `json:"claimDeadline"`
+}
+
+type SubmitTaskData struct {
+	Points      int64 `json:"points"`
+	TotalPoints int64 `json:"totalPoints"`
+}
+
+type SubmitTaskRequest struct {
+	Wallet      string `json:"wallet"`
+	TaskCode    string `json:"taskCode"`
+	ProveParams string `json:"proveParams"`
+}
+
+type SubmitTaskResponse struct {
+	BaseResp
+	Data SubmitTaskData `json:"data"`
 }
