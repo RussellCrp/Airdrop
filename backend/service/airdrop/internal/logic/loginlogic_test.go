@@ -41,10 +41,10 @@ func TestLoginLogic(t *testing.T) {
 	if err != nil {
 		t.Fatalf("login failed: %v", err)
 	}
-	if resp.AccessToken == "" {
+	if resp.Data.AccessToken == "" {
 		t.Fatal("token empty")
 	}
-	if resp.Points != 100 {
-		t.Fatalf("expected 100 points, got %d", resp.Points)
+	if resp.Data.Points != 100 {
+		t.Fatalf("expected 100 points, got %d", resp.Data.Points)
 	}
 }

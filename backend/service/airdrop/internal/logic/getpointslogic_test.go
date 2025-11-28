@@ -39,10 +39,10 @@ func TestGetPointsLogic(t *testing.T) {
 	if err != nil {
 		t.Fatalf("get points: %v", err)
 	}
-	if resp.Available != user.PointsBalance {
-		t.Fatalf("expected available %d, got %d", user.PointsBalance, resp.Available)
+	if resp.Data.Available != user.PointsBalance {
+		t.Fatalf("expected available %d, got %d", user.PointsBalance, resp.Data.Available)
 	}
-	if resp.LatestRound != int64(rp.RoundID) {
-		t.Fatalf("expected latest round %d, got %d", rp.RoundID, resp.LatestRound)
+	if resp.Data.LatestRound != int64(rp.RoundID) {
+		t.Fatalf("expected latest round %d, got %d", rp.RoundID, resp.Data.LatestRound)
 	}
 }

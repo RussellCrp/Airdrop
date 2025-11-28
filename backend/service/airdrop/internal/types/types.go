@@ -10,8 +10,13 @@ type AwardTaskRequest struct {
 	Extra  string `json:"extra"`
 }
 
-type AwardTaskResponse struct {
+type AwardTaskData struct {
 	Points int64 `json:"points"`
+}
+
+type AwardTaskResponse struct {
+	BaseResp
+	Data AwardTaskData `json:"data"`
 }
 
 type BaseResp struct {
@@ -26,9 +31,14 @@ type ClaimRequest struct {
 	Proof   []string `json:"proof"`
 }
 
-type ClaimResponse struct {
+type ClaimData struct {
 	TxHash string `json:"txHash"`
 	Status string `json:"status"`
+}
+
+type ClaimResponse struct {
+	BaseResp
+	Data ClaimData `json:"data"`
 }
 
 type LoginRequest struct {
@@ -37,14 +47,19 @@ type LoginRequest struct {
 	Timestamp int64  `json:"timestamp"`
 }
 
-type LoginResponse struct {
+type LoginData struct {
 	AccessToken string `json:"accessToken"`
 	ExpiresAt   int64  `json:"expiresAt"`
 	LoginDays   int64  `json:"loginDays"`
 	Points      int64  `json:"points"`
 }
 
-type PointsResponse struct {
+type LoginResponse struct {
+	BaseResp
+	Data LoginData `json:"data"`
+}
+
+type PointsData struct {
 	Wallet      string `json:"wallet"`
 	Available   int64  `json:"available"`
 	Frozen      int64  `json:"frozen"`
@@ -52,13 +67,23 @@ type PointsResponse struct {
 	LoginStreak int64  `json:"loginStreak"`
 }
 
-type RoundInfoResponse struct {
+type PointsResponse struct {
+	BaseResp
+	Data PointsData `json:"data"`
+}
+
+type RoundInfoData struct {
 	CurrentRoundId int64  `json:"currentRoundId"`
 	RoundName      string `json:"roundName"`
 	ClaimDeadline  int64  `json:"claimDeadline"`
 	MerkleRoot     string `json:"merkleRoot"`
 	TokenAddress   string `json:"tokenAddress"`
 	TotalPoints    int64  `json:"totalPoints"`
+}
+
+type RoundInfoResponse struct {
+	BaseResp
+	Data RoundInfoData `json:"data"`
 }
 
 type StartRoundRequest struct {

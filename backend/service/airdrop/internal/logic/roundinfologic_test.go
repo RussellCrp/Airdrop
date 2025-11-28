@@ -40,7 +40,7 @@ func TestRoundInfoLogic(t *testing.T) {
 	if err != nil {
 		t.Fatalf("round info: %v", err)
 	}
-	if resp.TotalPoints != rp.Points {
-		t.Fatalf("expected points %d, got %d", rp.Points, resp.TotalPoints)
+	if resp.Data.TotalPoints != rp.Points {
+		t.Fatalf("expected points %d, got %d", rp.Points, resp.Data.TotalPoints)
 	}
 }

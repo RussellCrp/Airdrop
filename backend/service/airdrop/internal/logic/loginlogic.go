@@ -108,10 +108,16 @@ func (l *LoginLogic) Login(req *types.LoginRequest) (*types.LoginResponse, error
 	}
 
 	return &types.LoginResponse{
-		AccessToken: token,
-		ExpiresAt:   expiresAt,
-		LoginDays:   int64(user.LoginDays),
-		Points:      user.PointsBalance,
+		BaseResp: types.BaseResp{
+			Code: 0,
+			Msg:  "success",
+		},
+		Data: types.LoginData{
+			AccessToken: token,
+			ExpiresAt:   expiresAt,
+			LoginDays:   int64(user.LoginDays),
+			Points:      user.PointsBalance,
+		},
 	}, nil
 }
 

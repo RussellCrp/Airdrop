@@ -88,7 +88,13 @@ func (l *ClaimAirdropLogic) ClaimAirdrop(req *types.ClaimRequest) (*types.ClaimR
 	}
 
 	return &types.ClaimResponse{
-		TxHash: "",
-		Status: entity.ClaimStatusPending,
+		BaseResp: types.BaseResp{
+			Code: 0,
+			Msg:  "success",
+		},
+		Data: types.ClaimData{
+			TxHash: "",
+			Status: entity.ClaimStatusPending,
+		},
 	}, nil
 }

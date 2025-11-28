@@ -55,8 +55,8 @@ func TestClaimAirdropLogic(t *testing.T) {
 	if err != nil {
 		t.Fatalf("claim: %v", err)
 	}
-	if resp.Status != entity.ClaimStatusPending {
-		t.Fatalf("expected pending status, got %s", resp.Status)
+	if resp.Data.Status != entity.ClaimStatusPending {
+		t.Fatalf("expected pending status, got %s", resp.Data.Status)
 	}
 	var claim entity.Claim
 	if err := svcCtx.DB.Where("round_id = ? AND wallet = ?", round.ID, user.Wallet).First(&claim).Error; err != nil {

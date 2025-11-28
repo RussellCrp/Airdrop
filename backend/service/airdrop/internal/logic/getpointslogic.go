@@ -47,10 +47,16 @@ func (l *GetPointsLogic) GetPoints() (*types.PointsResponse, error) {
 		latestRoundID = int64(roundPoint.RoundID)
 	}
 	return &types.PointsResponse{
-		Wallet:      claims.Wallet,
-		Available:   user.PointsBalance,
-		Frozen:      user.FrozenPoints,
-		LatestRound: latestRoundID,
-		LoginStreak: int64(user.LoginStreak),
+		BaseResp: types.BaseResp{
+			Code: 0,
+			Msg:  "success",
+		},
+		Data: types.PointsData{
+			Wallet:      claims.Wallet,
+			Available:   user.PointsBalance,
+			Frozen:      user.FrozenPoints,
+			LatestRound: latestRoundID,
+			LoginStreak: int64(user.LoginStreak),
+		},
 	}, nil
 }

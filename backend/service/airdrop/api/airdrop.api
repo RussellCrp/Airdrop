@@ -11,11 +11,16 @@ type LoginRequest {
 	timestamp int64  `json:"timestamp"`
 }
 
-type LoginResponse {
+type LoginData {
 	accessToken string `json:"accessToken"`
 	expiresAt   int64  `json:"expiresAt"`
 	loginDays   int64  `json:"loginDays"`
 	points      int64  `json:"points"`
+}
+
+type LoginResponse {
+	BaseResp
+	data LoginData `json:"data"`
 }
 
 type AwardTaskRequest {
@@ -25,8 +30,13 @@ type AwardTaskRequest {
 	extra  string `json:"extra"`
 }
 
-type AwardTaskResponse {
+type AwardTaskData {
 	points int64 `json:"points"`
+}
+
+type AwardTaskResponse {
+	BaseResp
+	data AwardTaskData `json:"data"`
 }
 
 type StartRoundRequest {
@@ -36,13 +46,18 @@ type StartRoundRequest {
 	claimDeadline int64  `json:"claimDeadline"`
 }
 
-type RoundInfoResponse {
+type RoundInfoData {
 	currentRoundId int64  `json:"currentRoundId"`
 	roundName      string `json:"roundName"`
 	claimDeadline  int64  `json:"claimDeadline"`
 	merkleRoot     string `json:"merkleRoot"`
 	tokenAddress   string `json:"tokenAddress"`
 	totalPoints    int64  `json:"totalPoints"`
+}
+
+type RoundInfoResponse {
+	BaseResp
+	data RoundInfoData `json:"data"`
 }
 
 type ClaimRequest {
@@ -52,17 +67,27 @@ type ClaimRequest {
 	proof   []string `json:"proof"`
 }
 
-type ClaimResponse {
+type ClaimData {
 	txHash string `json:"txHash"`
 	status string `json:"status"`
 }
 
-type PointsResponse {
+type ClaimResponse {
+	BaseResp
+	data ClaimData `json:"data"`
+}
+
+type PointsData {
 	wallet      string `json:"wallet"`
 	available   int64  `json:"available"`
 	frozen      int64  `json:"frozen"`
 	latestRound int64  `json:"latestRound"`
 	loginStreak int64  `json:"loginStreak"`
+}
+
+type PointsResponse {
+	BaseResp
+	data PointsData `json:"data"`
 }
 
 service airdrop-api {

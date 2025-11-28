@@ -72,11 +72,17 @@ func (l *StartRoundLogic) StartRound(req *types.StartRoundRequest) (*types.Round
 	l.svcCtx.DB.WithContext(l.ctx).Model(&entity.RoundPoint{}).Where("round_id = ?", round.ID).Select("COALESCE(SUM(points),0)").Scan(&total)
 
 	return &types.RoundInfoResponse{
-		CurrentRoundId: int64(round.ID),
-		RoundName:      round.Name,
-		ClaimDeadline:  round.ClaimDeadline.Unix(),
-		MerkleRoot:     round.MerkleRoot,
-		TokenAddress:   round.TokenAddress,
-		TotalPoints:    total,
+		BaseResp: types.BaseResp{
+			Code: 0,
+			Msg:  "success",
+		},
+		Data: types.RoundInfoData{
+			CurrentRoundId: int64(round.ID),
+			RoundName:      round.Name,
+			ClaimDeadline:  round.ClaimDeadline.Unix(),
+			MerkleRoot:     round.MerkleRoot,
+			TokenAddress:   round.TokenAddress,
+			TotalPoints:    total,
+		},
 	}, nil
 }

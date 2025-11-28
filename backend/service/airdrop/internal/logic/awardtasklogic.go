@@ -85,6 +85,12 @@ func (l *AwardTaskLogic) AwardTask(req *types.AwardTaskRequest) (*types.AwardTas
 	}
 
 	return &types.AwardTaskResponse{
-		Points: user.PointsBalance,
+		BaseResp: types.BaseResp{
+			Code: 0,
+			Msg:  "success",
+		},
+		Data: types.AwardTaskData{
+			Points: user.PointsBalance,
+		},
 	}, nil
 }

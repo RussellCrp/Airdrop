@@ -33,18 +33,30 @@ func (l *RoundInfoLogic) RoundInfo() (*types.RoundInfoResponse, error) {
 	err := l.svcCtx.DB.WithContext(l.ctx).Where("status = ?", "active").Order("id DESC").First(&round).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return &types.RoundInfoResponse{}, nil
+			return &types.RoundInfoResponse{
+				BaseResp: types.BaseResp{
+					Code: 0,
+					Msg:  "success",
+				},
+				Data: types.RoundInfoData{},
+			}, nil
 		}
 		return nil, err
 	}
 	var total int64
 	l.svcCtx.DB.WithContext(l.ctx).Model(&entity.RoundPoint{}).Where("round_id = ?", round.ID).Select("COALESCE(SUM(points),0)").Scan(&total)
 	return &types.RoundInfoResponse{
-		CurrentRoundId: int64(round.ID),
-		RoundName:      round.Name,
-		ClaimDeadline:  round.ClaimDeadline.Unix(),
-		MerkleRoot:     round.MerkleRoot,
-		TokenAddress:   round.TokenAddress,
-		TotalPoints:    total,
+		BaseResp: types.BaseResp{
+			Code: 0,
+			Msg:  "success",
+		},
+		Data: types.RoundInfoData{
+			CurrentRoundId: int64(round.ID),
+			RoundName:      round.Name,
+			ClaimDeadline:  round.ClaimDeadline.Unix(),
+			MerkleRoot:     round.MerkleRoot,
+			TokenAddress:   round.TokenAddress,
+			TotalPoints:    total,
+		},
 	}, nil
 }

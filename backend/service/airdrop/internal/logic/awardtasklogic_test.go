@@ -19,7 +19,7 @@ func TestAwardTaskLogic(t *testing.T) {
 	if err != nil {
 		t.Fatalf("award task: %v", err)
 	}
-	if resp.Points != 1000 {
-		t.Fatalf("expected 1000 points, got %d", resp.Points)
+	if resp.Data.Points != 1000 {
+		t.Fatalf("expected 1000 points, got %d", resp.Data.Points)
 	}
 }

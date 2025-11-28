@@ -30,11 +30,11 @@ func TestStartRoundLogic(t *testing.T) {
 	if err != nil {
 		t.Fatalf("start round: %v", err)
 	}
-	if resp.CurrentRoundId == 0 {
+	if resp.Data.CurrentRoundId == 0 {
 		t.Fatal("round id missing")
 	}
 	var snapshot entity.RoundPoint
-	if err := svcCtx.DB.Where("round_id = ? AND user_id = ?", resp.CurrentRoundId, user.ID).First(&snapshot).Error; err != nil {
+	if err := svcCtx.DB.Where("round_id = ? AND user_id = ?", resp.Data.CurrentRoundId, user.ID).First(&snapshot).Error; err != nil {
 		t.Fatalf("round snapshot missing: %v", err)
 	}
 	if snapshot.Points != 800 {
