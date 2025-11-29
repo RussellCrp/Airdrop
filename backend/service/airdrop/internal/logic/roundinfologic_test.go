@@ -8,6 +8,7 @@ import (
 
 	"airdrop/internal/entity"
 	"airdrop/internal/testutil"
+	"airdrop/internal/types"
 )
 
 func TestRoundInfoLogic(t *testing.T) {
@@ -36,7 +37,10 @@ func TestRoundInfoLogic(t *testing.T) {
 	if err := svcCtx.DB.Create(&rp).Error; err != nil {
 		t.Fatalf("create round point: %v", err)
 	}
-	resp, err := NewRoundInfoLogic(context.Background(), svcCtx).RoundInfo()
+	req := &types.RoundInfoRequest{
+		RoundName: round.Name,
+	}
+	resp, err := NewRoundInfoLogic(context.Background(), svcCtx).RoundInfo(req)
 	if err != nil {
 		t.Fatalf("round info: %v", err)
 	}

@@ -63,18 +63,3 @@ Content-Type: application/json
   "tokenAddress": "0xTokenAddress000000000000000000000000000000000000",
   "claimDeadline": 1730390400
 }
-
-###
-### 给某个任务发放积分（管理员 JWT）
-POST {{baseUrl}}/api/airdrop/v1/admin/tasks/award
-Authorization: Bearer {{$global.accessToken}}
-Content-Type: application/json
-
-{
-  "wallet": "{{wallet}}",
-  "task": "{{taskName}}",
-  "amount": 50,
-  "extra": "optional-remark"
-}
-
-

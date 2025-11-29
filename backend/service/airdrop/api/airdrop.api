@@ -23,27 +23,16 @@ type LoginResponse {
 	data LoginData `json:"data"`
 }
 
-type AwardTaskRequest {
-	wallet string `json:"wallet"`
-	task   string `json:"task"`
-	amount int64  `json:"amount"`
-	extra  string `json:"extra"`
-}
-
-type AwardTaskData {
-	points int64 `json:"points"`
-}
-
-type AwardTaskResponse {
-	BaseResp
-	data AwardTaskData `json:"data"`
-}
-
 type StartRoundRequest {
 	roundName     string `json:"roundName"`
 	merkleRoot    string `json:"merkleRoot"`
 	tokenAddress  string `json:"tokenAddress"`
 	claimDeadline int64  `json:"claimDeadline"`
+}
+
+type RoundInfoRequest {
+	roundId   uint64 `json:"currentRoundId"`
+	roundName string `json:"roundName"`
 }
 
 type RoundInfoData {
@@ -58,23 +47,6 @@ type RoundInfoData {
 type RoundInfoResponse {
 	BaseResp
 	data RoundInfoData `json:"data"`
-}
-
-type ClaimRequest {
-	roundId int64    `json:"roundId"`
-	wallet  string   `json:"wallet"`
-	amount  int64    `json:"amount"`
-	proof   []string `json:"proof"`
-}
-
-type ClaimData {
-	txHash string `json:"txHash"`
-	status string `json:"status"`
-}
-
-type ClaimResponse {
-	BaseResp
-	data ClaimData `json:"data"`
 }
 
 type PointsData {
@@ -129,17 +101,11 @@ service airdrop-api {
 	@handler GetPoints
 	get /api/airdrop/v1/me/points returns (PointsResponse)
 
-	@handler ClaimAirdrop
-	post /api/airdrop/v1/airdrop/claim (ClaimRequest) returns (ClaimResponse)
-
-	@handler AwardTask
-	post /api/airdrop/v1/admin/tasks/award (AwardTaskRequest) returns (AwardTaskResponse)
-
 	@handler StartRound
 	post /api/airdrop/v1/admin/airdrop/start (StartRoundRequest) returns (RoundInfoResponse)
 
 	@handler RoundInfo
-	get /api/airdrop/v1/admin/airdrop/round returns (RoundInfoResponse)
+	get /api/airdrop/v1/admin/airdrop/round (RoundInfoRequest) returns (RoundInfoResponse)
 
 	@handler SubmitTask
 	post /api/airdrop/v1/airdrop/task/submit (SubmitTaskRequest) returns (SubmitTaskResponse)

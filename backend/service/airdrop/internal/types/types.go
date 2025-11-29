@@ -3,30 +3,9 @@
 
 package types
 
-type AwardTaskData struct {
-	Points int64 `json:"points"`
-}
-
-type AwardTaskRequest struct {
-	Wallet string `json:"wallet"`
-	Task   string `json:"task"`
-	Amount int64  `json:"amount"`
-	Extra  string `json:"extra"`
-}
-
-type AwardTaskResponse struct {
-	BaseResp
-	Data AwardTaskData `json:"data"`
-}
-
 type BaseResp struct {
 	Code int64  `json:"code"`
 	Msg  string `json:"msg"`
-}
-
-type ClaimData struct {
-	TxHash string `json:"txHash"`
-	Status string `json:"status"`
 }
 
 type ClaimProofData struct {
@@ -43,18 +22,6 @@ type ClaimProofRequest struct {
 type ClaimProofResponse struct {
 	BaseResp
 	Data ClaimProofData `json:"data"`
-}
-
-type ClaimRequest struct {
-	RoundId int64    `json:"roundId"`
-	Wallet  string   `json:"wallet"`
-	Amount  int64    `json:"amount"`
-	Proof   []string `json:"proof"`
-}
-
-type ClaimResponse struct {
-	BaseResp
-	Data ClaimData `json:"data"`
 }
 
 type LoginData struct {
@@ -95,6 +62,11 @@ type RoundInfoData struct {
 	MerkleRoot     string `json:"merkleRoot"`
 	TokenAddress   string `json:"tokenAddress"`
 	TotalPoints    int64  `json:"totalPoints"`
+}
+
+type RoundInfoRequest struct {
+	RoundId   uint64 `json:"currentRoundId"`
+	RoundName string `json:"roundName"`
 }
 
 type RoundInfoResponse struct {
