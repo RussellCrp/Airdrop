@@ -124,27 +124,27 @@ type ClaimProofResponse {
 
 service airdrop-api {
 	@handler Login
-	post /api/v1/auth/login (LoginRequest) returns (LoginResponse)
+	post /api/airdrop/v1/auth/login (LoginRequest) returns (LoginResponse)
 
 	@handler GetPoints
-	get /api/v1/me/points returns (PointsResponse)
+	get /api/airdrop/v1/me/points returns (PointsResponse)
 
 	@handler ClaimAirdrop
-	post /api/v1/airdrop/claim (ClaimRequest) returns (ClaimResponse)
+	post /api/airdrop/v1/airdrop/claim (ClaimRequest) returns (ClaimResponse)
 
 	@handler AwardTask
-	post /api/v1/admin/tasks/award (AwardTaskRequest) returns (AwardTaskResponse)
+	post /api/airdrop/v1/admin/tasks/award (AwardTaskRequest) returns (AwardTaskResponse)
 
 	@handler StartRound
-	post /api/v1/admin/airdrop/start (StartRoundRequest) returns (RoundInfoResponse)
+	post /api/airdrop/v1/admin/airdrop/start (StartRoundRequest) returns (RoundInfoResponse)
 
 	@handler RoundInfo
-	get /api/v1/admin/airdrop/round returns (RoundInfoResponse)
+	get /api/airdrop/v1/admin/airdrop/round returns (RoundInfoResponse)
 
 	@handler SubmitTask
-	post /api/v1/airdrop/task/submit (SubmitTaskRequest) returns (SubmitTaskResponse)
+	post /api/airdrop/v1/airdrop/task/submit (SubmitTaskRequest) returns (SubmitTaskResponse)
 
 	@handler GetProofTask
-	get /api/v1/airdrop/me/proof (ClaimProofRequest) returns (ClaimProofResponse)
+	get /api/airdrop/v1/airdrop/me/proof (ClaimProofRequest) returns (ClaimProofResponse)
 }
 

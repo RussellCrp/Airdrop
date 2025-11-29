@@ -17,7 +17,7 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 		[]rest.Route{
 			{
 				Method:  http.MethodPost,
-				Path:    "/api/v1/auth/login",
+				Path:    "/api/airdrop/v1/auth/login",
 				Handler: LoginHandler(serverCtx),
 			},
 		},
@@ -28,22 +28,17 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 		[]rest.Middleware{serverCtx.JWTMiddleware},
 		rest.Route{
 			Method:  http.MethodGet,
-			Path:    "/api/v1/me/points",
+			Path:    "/api/airdrop/v1/me/points",
 			Handler: GetPointsHandler(serverCtx),
 		},
-		// rest.Route{
-		// 	Method:  http.MethodPost,
-		// 	Path:    "/api/v1/airdrop/claim",
-		// 	Handler: ClaimAirdropHandler(serverCtx),
-		// },
 		rest.Route{
 			Method:  http.MethodPost,
-			Path:    "/api/v1/airdrop/task/submit",
+			Path:    "/api/airdrop/v1/airdrop/task/submit",
 			Handler: SubmitTaskHandler(serverCtx),
 		},
 		rest.Route{
 			Method:  http.MethodGet,
-			Path:    "/api/v1/airdrop/me/proof",
+			Path:    "/api/airdrop/v1/airdrop/me/proof",
 			Handler: GetProofTaskHandler(serverCtx),
 		},
 	))
@@ -57,18 +52,13 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 		adminMiddlewares,
 		rest.Route{
 			Method:  http.MethodGet,
-			Path:    "/api/v1/admin/airdrop/round",
+			Path:    "/api/airdrop/v1/admin/airdrop/round",
 			Handler: RoundInfoHandler(serverCtx),
 		},
 		rest.Route{
 			Method:  http.MethodPost,
-			Path:    "/api/v1/admin/airdrop/start",
+			Path:    "/api/airdrop/v1/admin/airdrop/start",
 			Handler: StartRoundHandler(serverCtx),
 		},
-		// rest.Route{
-		// 	Method:  http.MethodPost,
-		// 	Path:    "/api/v1/admin/tasks/award",
-		// 	Handler: AwardTaskHandler(serverCtx),
-		// },
 	))
 }
