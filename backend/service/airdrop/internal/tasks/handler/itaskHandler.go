@@ -2,6 +2,7 @@ package handler
 
 import (
 	"airdrop/internal/svc"
+	"airdrop/internal/types"
 	"context"
 	"fmt"
 )
@@ -12,20 +13,19 @@ const (
 )
 
 type TaskHandlerParams struct {
-	TaskCode string
-	Wallet   string
-	Ctx      context.Context
-	SvcCtx   *svc.ServiceContext
+	SubmitTask *types.SubmitTaskRequest
+	Ctx        context.Context
+	SvcCtx     *svc.ServiceContext
 }
 
 func NewTaskHandler(params *TaskHandlerParams) (ITaskHandler, error) {
-	switch params.TaskCode {
+	switch params.SubmitTask.TaskCode {
 	case LoginTaskCode:
 		return &LoginTaskHandler{params: params}, nil
 	case InvestTaskCode:
 		return &InvestTaskHandler{params: params}, nil
 	default:
-		return nil, fmt.Errorf("unknown task code: %s", params.TaskCode)
+		return nil, fmt.Errorf("unknown task code: %s", params.SubmitTask.TaskCode)
 	}
 }
 

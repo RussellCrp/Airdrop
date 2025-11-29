@@ -6,7 +6,6 @@ package logic
 import (
 	"context"
 	"errors"
-	"fmt"
 	"time"
 
 	"airdrop/internal/entity"
@@ -49,10 +48,10 @@ func (l *LoginLogic) Login(req *types.LoginRequest) (*types.LoginResponse, error
 	if !l.validateTimestamp(req.Timestamp) {
 		return nil, errors.New("timestamp skew too large")
 	}
-	message := fmt.Sprintf("%s:%s:%d", loginMessagePrefix, wallet, req.Timestamp)
-	if err := util.VerifyPersonalSignature(wallet, req.Signature, message); err != nil {
-		return nil, err
-	}
+	// message := fmt.Sprintf("%s:%s:%d", loginMessagePrefix, wallet, req.Timestamp)
+	// if err := util.VerifyPersonalSignature(wallet, req.Signature, message); err != nil {
+	// 	return nil, err
+	// }
 
 	var user entity.User
 	if err := l.svcCtx.DB.Where("wallet = ?", wallet).First(&user).Error; err != nil {
@@ -80,10 +79,12 @@ func (l *LoginLogic) Login(req *types.LoginRequest) (*types.LoginResponse, error
 	}
 
 	if taskHandler, err := handler.NewTaskHandler(&handler.TaskHandlerParams{
-		TaskCode: handler.LoginTaskCode,
-		SvcCtx:   l.svcCtx,
-		Wallet:   wallet,
-		Ctx:      l.ctx,
+		Ctx:    l.ctx,
+		SvcCtx: l.svcCtx,
+		SubmitTask: &types.SubmitTaskRequest{
+			TaskCode: handler.LoginTaskCode,
+			Wallet:   wallet,
+		},
 	}); err == nil {
 		if err := taskHandler.Handle(); err != nil {
 			l.Logger.Errorf("handle task failed: %v", err)

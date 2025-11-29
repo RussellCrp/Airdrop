@@ -12,7 +12,9 @@ import (
 	"airdrop/internal/entity"
 	"airdrop/internal/svc"
 	"airdrop/internal/types"
+	"airdrop/internal/util"
 
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
 )
@@ -44,30 +46,90 @@ func (l *StartRoundLogic) StartRound(req *types.StartRoundRequest) (*types.Round
 	}
 	round := &entity.AirdropRound{
 		Name:          req.RoundName,
-		MerkleRoot:    strings.ToLower(req.MerkleRoot),
+		MerkleRoot:    "", // 将在生成后更新
 		TokenAddress:  strings.ToLower(req.TokenAddress),
 		ClaimDeadline: deadline,
 		Status:        "active",
 	}
 
-	err := l.svcCtx.RunTx(l.ctx, func(tx *gorm.DB) error {
-		if err := tx.Model(&entity.AirdropRound{}).Where("status = ?", "active").Update("status", "archived").Error; err != nil {
-			return err
-		}
+	now := time.Now().UTC()
+	round.SnapshotAt = &now
+
+	var merkleRoot string
+	if err := l.svcCtx.RunTx(l.ctx, func(tx *gorm.DB) error {
+		// 先创建 round 以获取 ID
 		if err := tx.Create(round).Error; err != nil {
 			return err
 		}
+
+		// Snapshot round in the same transaction
+		var users []entity.User
+		if err := tx.Find(&users).Error; err != nil {
+			return err
+		}
+
+		// 收集用于生成 MerkleRoot 的数据
+		var merkleLeaves []util.MerkleLeaf
+		for i := range users {
+			u := users[i]
+			if u.PointsBalance == 0 {
+				continue
+			}
+
+			// 创建 RoundPoint
+			entry := entity.RoundPoint{
+				RoundID: round.ID,
+				UserID:  u.ID,
+				Points:  u.PointsBalance,
+			}
+			if err := tx.Create(&entry).Error; err != nil {
+				return err
+			}
+
+			// 收集 Merkle 叶子节点数据
+			merkleLeaves = append(merkleLeaves, util.MerkleLeaf{
+				RoundID: uint64(round.ID),
+				Wallet:  strings.ToLower(u.Wallet),
+				Amount:  u.PointsBalance,
+			})
+
+			u.FrozenPoints = u.PointsBalance
+			u.PointsBalance = 0
+			if err := tx.Save(&u).Error; err != nil {
+				return err
+			}
+			ledger := &entity.PointsLedger{
+				UserID: u.ID,
+				Delta:  -entry.Points,
+				Reason: "snapshot",
+			}
+			if err := tx.Create(ledger).Error; err != nil {
+				return err
+			}
+		}
+
+		if len(merkleLeaves) == 0 {
+			return errors.New("no users with points")
+		}
+
+		// 生成 MerkleRoot
+		root, _, err := util.BuildMerkleTree(merkleLeaves)
+		if err != nil {
+			return err
+		}
+		merkleRoot = common.BytesToHash(root).Hex()
+		round.MerkleRoot = strings.ToLower(merkleRoot)
+
+		// 更新 round 的 MerkleRoot
+		if err := tx.Model(round).Update("merkle_root", round.MerkleRoot).Error; err != nil {
+			return err
+		}
+
 		return nil
-	})
-	if err != nil {
+	}); err != nil {
 		return nil, err
 	}
 
-	now := time.Now().UTC()
-	round.SnapshotAt = &now
-	if err := l.svcCtx.SnapshotRound(l.ctx, round); err != nil {
-		return nil, err
-	}
 	var total int64
 	l.svcCtx.DB.WithContext(l.ctx).Model(&entity.RoundPoint{}).Where("round_id = ?", round.ID).Select("COALESCE(SUM(points),0)").Scan(&total)
 

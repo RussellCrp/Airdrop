@@ -18,7 +18,7 @@ type LoginTaskHandler struct {
 func (h *LoginTaskHandler) Handle() error {
 	now := time.Now().UTC()
 	user := &entity.User{}
-	if err := h.params.SvcCtx.DB.Where("wallet = ?", h.params.Wallet).First(user).Error; err != nil {
+	if err := h.params.SvcCtx.DB.Where("wallet = ?", h.params.SubmitTask.Wallet).First(user).Error; err != nil {
 		return err
 	}
 	newDay := user.LastLoginAt == nil || !util.SameDay(*user.LastLoginAt, now)
@@ -39,7 +39,7 @@ func (h *LoginTaskHandler) Handle() error {
 			reward := int64(user.LoginStreak) * 100
 			if reward > 0 {
 				metaBytes, _ := json.Marshal(map[string]interface{}{
-					"streak": user.LoginStreak,
+					"login_streak": user.LoginStreak,
 				})
 				ledger := &entity.PointsLedger{
 					UserID: user.ID,
@@ -51,9 +51,8 @@ func (h *LoginTaskHandler) Handle() error {
 					return err
 				}
 				user.PointsBalance += reward
-				return tx.Save(user).Error
 			}
-			return nil
+			return tx.Save(user).Error
 		}); err != nil {
 			return err
 		}

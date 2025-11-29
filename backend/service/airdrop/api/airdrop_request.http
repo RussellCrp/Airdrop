@@ -20,7 +20,7 @@ Content-Type: application/json
 }
 
 {{
-  $global.accessToken=response.parsedBody.accessToken;
+  $global.accessToken=response.parsedBody.data.accessToken;
 }}
 
 ###

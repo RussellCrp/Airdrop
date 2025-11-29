@@ -29,6 +29,22 @@ type ClaimData struct {
 	Status string `json:"status"`
 }
 
+type ClaimProofData struct {
+	RoundId int64    `json:"roundId"`
+	Wallet  string   `json:"wallet"`
+	Amount  int64    `json:"amount"`
+	Proof   []string `json:"proof"`
+}
+
+type ClaimProofRequest struct {
+	RoundId int64 `json:"roundId"`
+}
+
+type ClaimProofResponse struct {
+	BaseResp
+	Data ClaimProofData `json:"data"`
+}
+
 type ClaimRequest struct {
 	RoundId int64    `json:"roundId"`
 	Wallet  string   `json:"wallet"`
@@ -70,14 +86,6 @@ type PointsData struct {
 type PointsResponse struct {
 	BaseResp
 	Data PointsData `json:"data"`
-}
-
-type RegistrationRequest struct {
-	Wallet string `json:"wallet"`
-}
-
-type RegistrationResponse struct {
-	BaseResp
 }
 
 type RoundInfoData struct {

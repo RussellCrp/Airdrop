@@ -81,7 +81,7 @@ func (s *ServiceContext) SnapshotRound(ctx context.Context, round *entity.Airdro
 			ledger := &entity.PointsLedger{
 				UserID: u.ID,
 				Delta:  -entry.Points,
-				Reason: "snapshot",
+				Reason: "start round",
 			}
 			if err := tx.Create(ledger).Error; err != nil {
 				return err

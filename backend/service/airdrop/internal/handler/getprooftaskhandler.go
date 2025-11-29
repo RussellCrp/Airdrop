@@ -12,16 +12,16 @@ import (
 	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
-func RegistrationHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+func GetProofTaskHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req types.RegistrationRequest
+		var req types.ClaimProofRequest
 		if err := httpx.Parse(r, &req); err != nil {
 			httpx.ErrorCtx(r.Context(), w, err)
 			return
 		}
 
-		l := logic.NewRegistrationLogic(r.Context(), svcCtx)
-		resp, err := l.Registration(&req)
+		l := logic.NewGetProofTaskLogic(r.Context(), svcCtx)
+		resp, err := l.GetProofTask(&req)
 		if err != nil {
 			httpx.ErrorCtx(r.Context(), w, err)
 		} else {

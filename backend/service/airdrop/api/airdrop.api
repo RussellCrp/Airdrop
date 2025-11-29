@@ -106,12 +106,20 @@ type SubmitTaskResponse {
 	data SubmitTaskData `json:"data"`
 }
 
-type RegistrationRequest {
-	wallet string `json:"wallet"`
+type ClaimProofRequest {
+	roundId int64 `json:"roundId"`
 }
 
-type RegistrationResponse {
+type ClaimProofData {
+	roundId int64    `json:"roundId"`
+	wallet  string   `json:"wallet"`
+	amount  int64    `json:"amount"`
+	proof   []string `json:"proof"`
+}
+
+type ClaimProofResponse {
 	BaseResp
+	data ClaimProofData `json:"data"`
 }
 
 service airdrop-api {
@@ -136,7 +144,7 @@ service airdrop-api {
 	@handler SubmitTask
 	post /api/v1/airdrop/task/submit (SubmitTaskRequest) returns (SubmitTaskResponse)
 
-	@handler Registration
-	post /api/v1/airdrop/me/registration (RegistrationRequest) returns (RegistrationResponse)
+	@handler GetProofTask
+	get /api/v1/airdrop/me/proof (ClaimProofRequest) returns (ClaimProofResponse)
 }
 
