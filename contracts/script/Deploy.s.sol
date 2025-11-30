@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-import "forge-std/Script.sol";
+import {Script} from "forge-std/Script.sol";
 import {AirdropToken} from "../src/AirdropToken.sol";
 import {AirdropDistributor} from "../src/AirdropDistributor.sol";
 
