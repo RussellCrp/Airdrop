@@ -1,66 +1,106 @@
-## Foundry
+## 智能合约（contracts）
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+本目录是 Airdrop 平台的 **智能合约工程**，使用 Foundry 开发和测试。
 
-Foundry consists of:
+### 目录结构
 
-- **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
-- **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
-- **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
-- **Chisel**: Fast, utilitarian, and verbose solidity REPL.
-
-## Documentation
-
-https://book.getfoundry.sh/
-
-## Usage
-
-### Build
-
-```shell
-$ forge build
+```text
+contracts/
+├── src/               # 合约源码
+│   ├── AirdropToken.sol
+│   ├── AirdropDistributor.sol
+│   └── MerkleProof.sol
+├── script/            # 部署 & 运维脚本
+│   ├── AirdropTokenDeploy.s.sol
+│   ├── AirdropDeploy.s.sol
+│   ├── AirdropTokenMint.s.sol
+│   ├── ClaimAirdropToken.s.sol
+│   └── GetAirdropTokenBanlance.s.sol
+├── test/              # 合约测试
+│   ├── AirdropDistributor.t.sol
+│   └── AirdropDistributorMerkle.t.sol
+├── broadcast/         # Forge 脚本广播记录
+├── foundry.toml       # Foundry 配置
+└── foundry.lock
 ```
 
-### Test
+### 环境准备
 
-```shell
-$ forge test
+- 已安装 Foundry（`forge`, `cast`, `anvil` 等）  
+  如未安装，可参照官方文档：`https://book.getfoundry.sh/`
+
+### 安装依赖
+
+```bash
+cd contracts
+forge install
 ```
 
-### Format
+### 编译合约
 
-```shell
-$ forge fmt
+```bash
+cd contracts
+forge build
 ```
 
-### Gas Snapshots
+### 运行测试
 
-```shell
-$ forge snapshot
+```bash
+cd contracts
+forge test -vvv
 ```
 
-### Anvil
+### 常用脚本
 
-```shell
-$ anvil
-```
+- **部署代币合约**
 
-### Deploy
+  ```bash
+  cd contracts
+  forge script script/AirdropTokenDeploy.s.sol:AirdropTokenDeploy \
+    --rpc-url $RPC_URL \
+    --private-key $PRIVATE_KEY \
+    --broadcast
+  ```
 
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
+- **部署 AirdropDistributor**
 
-### Cast
+  ```bash
+  cd contracts
+  forge script script/AirdropDeploy.s.sol:AirdropDeploy \
+    --rpc-url $RPC_URL \
+    --private-key $PRIVATE_KEY \
+    --broadcast
+  ```
 
-```shell
-$ cast <subcommand>
-```
+- **给 Distributor 铸造/转入代币**
 
-### Help
+  ```bash
+  cd contracts
+  forge script script/AirdropTokenMint.s.sol:AirdropTokenMint \
+    --rpc-url $RPC_URL \
+    --private-key $PRIVATE_KEY \
+    --broadcast
+  ```
 
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```
+- **链上领取空投**
+
+  ```bash
+  cd contracts
+  forge script script/ClaimAirdropToken.s.sol:ClaimAirdropToken \
+    --rpc-url $RPC_URL \
+    --private-key $PRIVATE_KEY \
+    --broadcast
+  ```
+
+- **查询空投代币余额**
+
+  ```bash
+  cd contracts
+  forge script script/GetAirdropTokenBanlance.s.sol:GetAirdropTokenBanlance \
+    --rpc-url $RPC_URL
+  ```
+
+### 提示
+
+- 后端相关说明请查看 `backend/README.md`。  
+- 根目录的 `README.md` 只作为整体项目的介绍与导航。  
