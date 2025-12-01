@@ -2,16 +2,17 @@
 pragma solidity ^0.8.24;
 
 import {Script} from "forge-std/Script.sol";
+import {console} from "forge-std/console.sol";
 import {AirdropToken} from "../src/AirdropToken.sol";
 import {AirdropDistributor} from "../src/AirdropDistributor.sol";
 
-contract Deploy is Script {
+contract AirdropTokenDeploy is Script {
     function run() external {
-        uint256 deployerKey = vm.envUint("PRIVATE_KEY");
+        uint256 deployerKey = vm.envUint("TEST_ACCOUNT1_PRIVATE_KEY");
         vm.startBroadcast(deployerKey);
         AirdropToken token = new AirdropToken("AirdropToken", "ADP", vm.addr(deployerKey));
-        AirdropDistributor distributor = new AirdropDistributor(address(token), vm.addr(deployerKey));
-        token.mint(address(distributor), 1_000_000 ether);
+        // 打印部署的合约地址（方便后续查看）
+        console.log("AirdropToken deployed to:", address(token));
         vm.stopBroadcast();
     }
 }
